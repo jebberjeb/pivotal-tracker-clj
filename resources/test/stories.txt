@@ -1,0 +1,42 @@
+[id]: 67391600
+[name]: Configure Apigee Production Environment
+[updated_at]: 2014-03-14T15:02:30Z
+[descriptionmd5]: ccb51126d9c9fe892bf9a80250e0542e
+[description]: -Final Configuration of Apigee Production Environment
+-Identification / Resolution of nginx interaction (w/ Infra)
+-URL rewrite to support /v1/listings -&gt; /v1/ag/listings
+-End to end testing w/ randr_api_test_jig
+=*=*=*=*=*=*=
+
+[id]: 67127452
+[name]: *INVESTIGATION* How do we set up &quot;cron&quot; job
+[updated_at]: 2014-03-13T16:48:44Z
+[descriptionmd5]: e3847210580c65f7b87e56398adf3203
+[description]: Talk to infra to discuss what would be involved in setting up an extra jboss instance of the AG server application per environment in order to handle &quot;the cron-job-like&quot; functionality for AG sites so that this option can be compared to using a more or less identical approach to what Property Solutions is currently doing for its cron job functionality.  With this extra jboss instance approach, the cron job would be curling AG server app routes.  If a Property Solutions type approach, then instead the cron job would be calling a terminal application built off the same AG server code base with a &quot;main function&quot; or similar.
+We need stories that cover:
+1. jenkins job to deploy
+2. figure out how to write cron jobs
+3. write HTTP endpoints for each provisioning stage (these endpoints should only listen on localhost?) or console
+Research Outcome:
+
+We'll use ftp.hpci.com to create a cron job which will issue a curl call to HTTP endpoint which will execute all provisioning stages sequentially. The endpoint will first check and possibly acquire a lock effectively making the job a singleton, across all jboss instances. At the end of the job, it will release the lock.
+Stores:
+https://www.pivotaltracker.com/story/show/67489124
+https://www.pivotaltracker.com/story/show/67434882
+https://www.pivotaltracker.com/story/show/67408974
+=*=*=*=*=*=*=
+
+[id]: 67489124
+[name]: Cron Jobs for Domain Provisioning Route
+[updated_at]: 2014-03-14T16:21:17Z
+[descriptionmd5]: fbf1f2bc0ee916cb16f34698f4376fb2
+[description]: foo
+=*=*=*=*=*=*=
+
+[id]: 67489124
+[name]: Cron Jobs for Domain Provisioning Route
+[updated_at]: 2014-03-14T16:21:17Z
+[descriptionmd5]: fbf1f2bc0ee916cb16f34698f4376fb2
+[description]: foo
+=*=*=*=*=*=*=
+

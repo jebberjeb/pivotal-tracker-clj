@@ -1,0 +1,162 @@
+[id]: 67391600
+[name]: Configure Apigee Production Environment
+[updated_at]: 2014-03-14T15:02:30Z
+[descriptionmd5]: ccb51126d9c9fe892bf9a80250e0542e
+[description]: -Final Configuration of Apigee Production Environment
+-Identification / Resolution of nginx interaction (w/ Infra)
+-URL rewrite to support /v1/listings -&gt; /v1/ag/listings
+-End to end testing w/ randr_api_test_jig
+=*=*=*=*=*=*=
+
+[id]: 67127452
+[name]: *INVESTIGATION* How do we set up &quot;cron&quot; job
+[updated_at]: 2014-03-13T16:48:44Z
+[descriptionmd5]: e3847210580c65f7b87e56398adf3203
+[description]: Talk to infra to discuss what would be involved in setting up an extra jboss instance of the AG server application per environment in order to handle &quot;the cron-job-like&quot; functionality for AG sites so that this option can be compared to using a more or less identical approach to what Property Solutions is currently doing for its cron job functionality.  With this extra jboss instance approach, the cron job would be curling AG server app routes.  If a Property Solutions type approach, then instead the cron job would be calling a terminal application built off the same AG server code base with a &quot;main function&quot; or similar.
+
+We need stories that cover:
+1. jenkins job to deploy
+2. figure out how to write cron jobs
+3. write HTTP endpoints for each provisioning stage (these endpoints should only listen on localhost?) or console
+
+Research Outcome:
+We'll use ftp.hpci.com to create a cron job which will issue a curl call to HTTP endpoint which will execute all provisioning stages sequentially. The endpoint will first check and possibly acquire a lock effectively making the job a singleton, across all jboss instances. At the end of the job, it will release the lock.
+
+Stores:
+https://www.pivotaltracker.com/story/show/67489124
+https://www.pivotaltracker.com/story/show/67434882
+https://www.pivotaltracker.com/story/show/67408974
+=*=*=*=*=*=*=
+
+[id]: 66245080
+[name]: Apigee Initial Setup
+[updated_at]: 2014-03-14T15:01:40Z
+[descriptionmd5]: 1394d0b976f989f92c21835f657f197b
+[description]: * provision organization
+* register Josh, David, Marc, Jeb, Infra accounts as admins
+* create CR3 product/proxy (routes for the API environment:  /reviews, /listings, /product-ids  -- needs solid name &quot;AG API&quot;?
+* create vendasta &amp; reputation.com developers, add to CR3 product, set rate limit
+* create duplicate setups mapped to our QA &amp; Prod environments
+* test user/API key created for this purpose
+
+AC: 
+* ops/heartbeat route accessible through apigee using api key (denied without it)
+* test user is rate limited (arbitrary limit -- 2 requests/minute)
+* reputation.com/vendasta are NOT rate limited
+=*=*=*=*=*=*=
+
+[id]: 67489124
+[name]: Cron Jobs for Domain Provisioning Route
+[updated_at]: 2014-03-14T16:21:17Z
+[descriptionmd5]: fbf1f2bc0ee916cb16f34698f4376fb2
+[description]: On ftp.hpci.com create:
+* users agsites, agsitesqa, agsitesci
+* cron jobs for each to invoke
+https://www.pivotaltracker.com/story/show/67408974
+=*=*=*=*=*=*=
+
+[id]: 62516648
+[name]: &lt;---END OF SPRINT 64 (02/11/14 - 02/24/14)--&gt;
+[updated_at]: 2014-02-26T15:03:22Z
+[descriptionmd5]: d41d8cd98f00b204e9800998ecf8427e
+[description]: 
+=*=*=*=*=*=*=
+
+[id]: 66090464
+[name]: Work with GoDaddy (and/or Wild West Domains) to get Certification before API work can complete
+[updated_at]: 2014-03-14T13:13:13Z
+[descriptionmd5]: aac78ac20576af3e78d9371ea88015d2
+[description]: AC:
+Complete Chapter 4!  &lt;-- of WSAPIQuickStartBook.pdf
+There are 7 main certification tasks (API calls which must be made and supplied with proper data) with other minor supporting actions (to get IDs, statuses, etc) needed as well.
+
+Notes:
+Get with Mike Gureta about below items;
+* White List iP
+* Get credentials for Certification 
+* Get credential for test environment 
+
+When chore is complete contact Mike Gureta
+=*=*=*=*=*=*=
+
+[id]: 66867866
+[name]: *DATA* Check price of a domain
+[updated_at]: 2014-03-14T21:53:47Z
+[descriptionmd5]: b06d438e2eb7912b33ac8d412cdadd2f
+[description]: Need the following from data:
+
+table - domain_price
+---
+root_domain varchar, unique, (maybe) primary key
+price money
+
+then we'd need to insert data to match this table: http://support.godaddy.com/help/article/5039/api-reseller-buy-rates
+
+Finally, a stored procedure to access price by root domain:
+get_domain_price(&quot;com&quot;)
+
+AC:
+*Data elements created. 
+*Create a function which invokes the stored procedure.
+=*=*=*=*=*=*=
+
+[id]: 67434882
+[name]: *DATA* Domain Provisioning: Provisioning Job Locking Mechanism
+[updated_at]: 2014-03-14T16:23:14Z
+[descriptionmd5]: 192490ee8168ca8535f3a13ca31e286f
+[description]: We need to ensure that only 1 instance of the provisioning job is being run at a given time. In order to do this, we need a table in Oracle to act as the lock.
+
+AC:
+1. A sproc to acquire the lock
+1a. lock acquisition must be atomic
+1b. lock acquisition must fail if the lock is not released
+2. A sproc to relase the lock
+=*=*=*=*=*=*=
+
+[id]: 65055404
+[name]: &lt;---END OF SPRINT 65 (02/25/14 - 03/10/14)--&gt;
+[updated_at]: 2014-02-26T15:03:22Z
+[descriptionmd5]: 2384d203cd7800dd0b7335bae26156f2
+[description]: &lt;---END OF SPRINT 65 (02/25/14 - 03/10/14)--&gt;
+=*=*=*=*=*=*=
+
+[id]: 62720214
+[name]: Check for domain availability using GoDaddy API
+[updated_at]: 2014-03-12T15:59:42Z
+[descriptionmd5]: aa3c651783112a1f220595c16ecf32d1
+[description]: Write utility to use GODaddy API to check the availability of the suggested domains.
+This utility should give meaningful error messages in all services are down.
+=*=*=*=*=*=*=
+
+[id]: 62720898
+[name]: Register the domain via GoDaddy API
+[updated_at]: 2014-03-15T17:35:24Z
+[descriptionmd5]: e493df84525daf39572cdf563094643b
+[description]: Use GoDaddy API to register a domain.
+
+AC:
+1. return {:status :success :job_id &amp;amp;lt;id&amp;amp;gt;} when then the request is successfully acknowledged
+2. return {:status :failure :reason &amp;amp;lt;reason&amp;amp;gt;} when the godaddy denies the job (ie. domain is not available)
+
+Technical Note: 
+Need to ensure it is price effective first! (#66867866)
+=*=*=*=*=*=*=
+
+[id]: 66893112
+[name]: &lt;---END OF SPRINT 66 (03/11/2014 - 03/24/2014)--&gt;
+[updated_at]: 2014-03-04T20:39:44Z
+[descriptionmd5]: d41d8cd98f00b204e9800998ecf8427e
+[description]: 
+=*=*=*=*=*=*=
+
+[id]: 66964658
+[name]:  *STUB* Configure DNS with Dynect
+[updated_at]: 2014-03-10T20:18:12Z
+[descriptionmd5]: a92a5290da09a89a0b7a57fc1a596284
+[description]: This depends on: https://www.pivotaltracker.com/story/show/67116940
+
+* How do we setup a subhost? 
+*** If we are providing DNS for ag sites, how do we point Go Daddy to our DNS servers? AND how do we get infra to setup a subhost in our DNS servers (i.e.  www.)?
+*** If Go Daddy is providing DNS for ag sites, how do we set DNS record in Go Daddy (host configuration)?
+=*=*=*=*=*=*=
+
