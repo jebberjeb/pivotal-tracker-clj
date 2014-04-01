@@ -15,4 +15,7 @@
                  [digest                          "1.4.3"]
                  [hiccup                          "1.0.5"]]
   :main pt.cli
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:uberjar {:aot :all}}
+  :test-selectors {:default (complement :integration)
+                   :integration :integration
+                   :all (constantly true)})

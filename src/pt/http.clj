@@ -19,25 +19,20 @@
       (.replace "&gt;"   ">")))
 
 (defn wrap-request
-  [request]
-  (assoc request
+  [request & kvs]
+  (apply assoc request
          :throw-entire-message? true
-         :insecure? true))
+         :insecure? true
+         kvs))
 
-(defn POST
-  [request url]
-  (let [response (client/post url (wrap-request request))]
-    (log url request response :post)
+(defn HTTP
+  [method request url]
+  (let [response (-> request
+                     (wrap-request :url url :method method)
+                     client/request)]
+    (log url request response method)
     response))
 
-(defn PUT
-  [request url]
-  (let [response (client/put url (wrap-request request))]
-    (log url request response :put)
-    response))
-
-(defn GET
-  [request url]
-  (let [response (client/get url (wrap-request request))]
-    (log url request response :get)
-    response))
+(def POST (partial HTTP :post))
+(def PUT  (partial HTTP :put))
+(def GET  (partial HTTP :get))
