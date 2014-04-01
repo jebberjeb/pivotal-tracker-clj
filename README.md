@@ -2,11 +2,26 @@
 
 [Pivotal Tracker API](https://www.pivotaltracker.com/help/api/rest/v5) Clojure wrapper.
 
-Also included:
-* Command-line interface tool
-* Vim integration (to the CLI tool)
+## Features
+
+* Search stories using search query
+* Update story descriptions
+* Check stories for modifications
+
+## Usage
+
+* Coming soon!
+
+## Building
+
+This project is build using [Leiningen](http://leiningen.org/). To build the
+jar, Simply run:
+
+    lein uberjar
 
 ## Command Line Interface
+
+Additionally, a command line interface is included.
 
     --file - the story file
     --load-stories - loads stories into story file
@@ -15,41 +30,12 @@ Also included:
     --token - pivotal tracker api token
     --project-id - id of project who's stories you want to query
 
-**Updates story name, description.
-
-## Vim Integration
-
-### Installation
-
-Using Pathogen, simply copy the vim-pivotal-tracker directory into ~/.vim/bundle.
-
-Also, add your pivotal token and project id to the top of pivotal.vim:
-
-    " Replace with your own values
-    let s:token = "ec88145a606fa874895ed411cf"
-    let s:project_id = "966911"
-
-### Dependencies
-
-A JVM is required. "java" binary must be on the $PATH.
-
-### Usage
-
-    <leader>pte - load stories into current buffer
-    <leader>ptw - save the current story, who's id is under the cursor
-
 ## BUGS
 
 ## TODO
 
-* even get rid of the commit logs w/ that stuff in it
-* split vim stuf out into a separate project w/ readme that points to the jar's
-  source (the other project) and explains the relationship, and how to build
-  it
-* notify vimscripts, and pivotal-tracker's dev site of the plugin, tweet it
-* Investigate leaner Clojure runtime options?
+* Investigate leaner Java/Clojure runtime options
 * Wrap additional API services
-
 
 Copyright © 2014 Jeb Beich
 
