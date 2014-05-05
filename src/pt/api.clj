@@ -26,6 +26,23 @@
     (log/info "new story: " escaped-story)
     story))
 
+(defn project-uri
+  [root-uri
+   project-id]
+  (format "%s/projects/%s" root-uri project-id))
+
+(defn story-uri
+  [root-uri
+   project-id
+   story-id]
+  (format "%s/stories/%s" (project-uri root-uri project-id) story-id))
+
+(defn comment-uri
+  [root-uri
+   project-id
+   story-id]
+  (format "%s/comments" (story-uri root-uri project-id story-id)))
+
 (defn get-base-req
   [token]
   {:headers {"X-TrackerToken" token}})
@@ -48,7 +65,7 @@
 
 (defn get-story
   [token project-id story-id]
-  (-> (str root-url "/projects/" project-id "/stories/" story-id)
+  (-> (story-uri root-url project-id story-id)
       (->> (http/GET (get-base-req token)))
       (throw-if-not-200)
       (:body)
@@ -67,7 +84,7 @@
 
 (defn update-story-description
   [token project-id story]
-  (let [url (str root-url "/projects/" project-id "/stories/" (:id story))
+  (let [url (story-uri root-url project-id (:id story))
         body (select-keys story [:description])
         request (assoc (get-base-req token) :form-params body)
         modified? (story-updated-since? token project-id (:id story)
@@ -80,4 +97,18 @@
           (cc/parse-string true)
           ;; Should we be adding md5s here? Does anyone use this response?
           (add-md5s)))))
+
+(defn get-comments
+  [token project-id story-id]
+  (-> (comment-uri root-url project-id story-id)
+      (->> (http/GET (get-base-req token)))
+      (throw-if-not-200)
+      (:body)
+      (cc/parse-string true)))
+
+(defn add-comment
+  [token project-id story-id comment]
+  "PUT" "/projects/project-id/stories/story-id" "{\"comment\": \"foo bar\""
+  )
+
 
