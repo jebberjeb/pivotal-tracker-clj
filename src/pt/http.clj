@@ -24,20 +24,17 @@
          :throw-entire-message? true
          :insecure? true))
 
-(defn POST
-  [request url]
-  (let [response (client/post url (wrap-request request))]
-    (log url request response :post)
-    response))
+(let [->method {:get client/get
+                :put client/put
+                :post client/post}]
 
-(defn PUT
-  [request url]
-  (let [response (client/put url (wrap-request request))]
-    (log url request response :put)
-    response))
+  (defn request
+    [method req url]
+    (let [response ((method ->method) url (wrap-request req))]
+      (log url req response method)
+      response)))
 
-(defn GET
-  [request url]
-  (let [response (client/get url (wrap-request request))]
-    (log url request response :get)
-    response))
+(def POST (partial request :post))
+(def PUT (partial request :put))
+(def GET (partial request :get))
+

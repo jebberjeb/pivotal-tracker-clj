@@ -9,6 +9,9 @@
 
 (def root-url "https://www.pivotaltracker.com/services/v5")
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; PRIVATE
+
 (defn throw-if-not-200
   [response]
   (if-not (= 200 (:status response))
@@ -47,30 +50,35 @@
   [token]
   {:headers {"X-TrackerToken" token}})
 
-;; TODO - reduce/remove duplication in
-;;        * results parsing pipeline
-;;        * rest url creation
+(defn request
+  [method req url]
+  ;; pre method is :get | :post | :put
+  (-> (http/request method req url)
+      (throw-if-not-200)
+      (:body)
+      (cc/parse-string true)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; PUBLIC
 
 (defn search-stories
   [token project-id query]
-  (let [enc-query (hic/url-encode query)]
-    (-> (str root-url "/projects/" project-id "/search?query=" enc-query)
-        (->> (http/GET (get-base-req token)))
-        (throw-if-not-200)
-        (:body)
-        (cc/parse-string true)
-        (:stories)
-        (:stories)
-        (->> (map add-md5s)))))
+  (let [enc-query (hic/url-encode query)
+        url (str root-url "/projects/" project-id "/search?query=" enc-query)
+        req (get-base-req token)]
+    (->> (request :get req url)
+         (:stories)
+         (:stories)
+         (map add-md5s))))
 
 (defn get-story
-  [token project-id story-id]
-  (-> (story-uri root-url project-id story-id)
-      (->> (http/GET (get-base-req token)))
-      (throw-if-not-200)
-      (:body)
-      (cc/parse-string true)
-      (add-md5s)))
+  ([token project-id story-id]
+   (let [url (story-uri root-url project-id story-id)
+         req (get-base-req token)]
+     (->> (request :get req url)
+          (add-md5s))))
+  ([token story]
+   (get-story token (:project_id story) (:id story))))
 
 ;; TODO - does this belong in this ns?
 (defn story-updated-since?
@@ -82,33 +90,31 @@
         curr-update (f/parse formatter (:updated_at story))]
     (t/after? curr-update orig-update)))
 
-(defn update-story-description
-  [token project-id story]
-  (let [url (story-uri root-url project-id (:id story))
-        body (select-keys story [:description])
-        request (assoc (get-base-req token) :form-params body)
-        modified? (story-updated-since? token project-id (:id story)
+(defn update-story
+  [field token project-id {:keys [story-id updated_at] :as story}]
+  (let [url (story-uri root-url project-id story-id)
+        body (select-keys story [field])
+        req (assoc (get-base-req token) :form-params body)
+        modified? (story-updated-since? token project-id story-id
                                         (:updated_at story))]
     (if modified? (throw (ex-info (format "story %s modified remotely"
-                                          (:id story)) story))
-      (-> (http/PUT request url)
-          (throw-if-not-200)
-          (:body)
-          (cc/parse-string true)
-          ;; Should we be adding md5s here? Does anyone use this response?
-          (add-md5s)))))
+                                          story-id) story))
+      (request :put req url))))
+
+(def update-story-description (partial update-story :description))
 
 (defn get-comments
-  [token project-id story-id]
-  (-> (comment-uri root-url project-id story-id)
-      (->> (http/GET (get-base-req token)))
-      (throw-if-not-200)
-      (:body)
-      (cc/parse-string true)))
+  ([token project-id story-id]
+   (request :get
+            (get-base-req token)
+            (comment-uri root-url project-id story-id)))
+  ([token story]
+   (get-comments token (:project_id story) (:id story))))
 
 (defn add-comment
   [token project-id story-id comment]
+  ;; TODO make an arity of one, using only a map
+  ;; TODO should share code w/ update-story-description
   "PUT" "/projects/project-id/stories/story-id" "{\"comment\": \"foo bar\""
   )
-
 
